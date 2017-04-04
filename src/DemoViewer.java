@@ -1,8 +1,5 @@
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -50,7 +47,7 @@ public class DemoViewer {
                 for (int q = 0; q < zBuffer.length; q++) {
                     zBuffer[q] = Double.NEGATIVE_INFINITY;
                 }
-                Vertex light = new Vertex(0, 0, 1);
+                Vertex light = new Vertex(5, 5, 3);
                 for (Triangle t : getTetrahedron()) {
                     Vertex v1 = transform.transform(t.v1);
                     Vertex v2 = transform.transform(t.v2);
@@ -58,10 +55,6 @@ public class DemoViewer {
 
                     Vertex normal = (new Triangle(v1, v2, v3, t.color)).getNormal();
                     double shading = Math.abs(normal.dot_product(light) / (normal.length() * light.length()));
-
-                    if(t.color == Color.BLUE){
-                        System.out.println(setColorWithLight(t.color, shading).getRGB());
-                    }
 
                     // since we are not using Graphics2D anymore,
                     // we have to do translation manually
