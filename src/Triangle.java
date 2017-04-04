@@ -15,4 +15,17 @@ public class Triangle {
         this.v3 = v3;
         this.color = color;
     }
+
+    Vertex getNormal(){
+        Vertex line_ab = v2.subtract(v1);
+        Vertex line_ac = v3.subtract(v1);
+
+        Vertex norm = line_ab.cross_product(line_ac);
+        double normLength = norm.length();
+        norm.x /= normLength;
+        norm.y /= normLength;
+        norm.z /= normLength;
+
+        return norm;
+    }
 }

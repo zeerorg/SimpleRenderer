@@ -26,7 +26,7 @@ public class DemoViewer {
             public void paintComponent(Graphics g) {
 
                 BufferedImage img =
-                        new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+                        new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
 
                 double heading = Math.toRadians(headingSlider.getValue());
                 double heading2 = Math.toRadians(pitchSlider.getValue());
@@ -50,10 +50,18 @@ public class DemoViewer {
                 for (int q = 0; q < zBuffer.length; q++) {
                     zBuffer[q] = Double.NEGATIVE_INFINITY;
                 }
+                Vertex light = new Vertex(0, 0, 1);
                 for (Triangle t : getTetrahedron()) {
                     Vertex v1 = transform.transform(t.v1);
                     Vertex v2 = transform.transform(t.v2);
                     Vertex v3 = transform.transform(t.v3);
+
+                    Vertex normal = (new Triangle(v1, v2, v3, t.color)).getNormal();
+                    double shading = Math.abs(normal.dot_product(light) / (normal.length() * light.length()));
+
+                    if(t.color == Color.BLUE){
+                        System.out.println(setColorWithLight(t.color, shading).getRGB());
+                    }
 
                     // since we are not using Graphics2D anymore,
                     // we have to do translation manually
@@ -88,7 +96,8 @@ public class DemoViewer {
                                 double depth = b1 * v1.z + b2 * v2.z + b3 * v3.z;
                                 int zIndex = y * img.getWidth() + x;
                                 if (zBuffer[zIndex] < depth) {
-                                    img.setRGB(x, y, t.color.getRGB());
+
+                                    img.setRGB(x, y, setColorWithLight(t.color, shading).getRGB());
                                     zBuffer[zIndex] = depth;
                                 }
                             }
@@ -113,19 +122,31 @@ public class DemoViewer {
         tris.add(new Triangle(new Vertex(100, 100, 100),
                 new Vertex(-100, -100, 100),
                 new Vertex(-100, 100, -100),
-                Color.WHITE));
+                Color.BLUE));
         tris.add(new Triangle(new Vertex(100, 100, 100),
                 new Vertex(-100, -100, 100),
                 new Vertex(100, -100, -100),
-                Color.RED));
-        tris.add(new Triangle(new Vertex(-100, 100, -100),
-                new Vertex(100, -100, -100),
-                new Vertex(100, 100, 100),
                 Color.GREEN));
         tris.add(new Triangle(new Vertex(-100, 100, -100),
                 new Vertex(100, -100, -100),
+                new Vertex(100, 100, 100),
+                Color.RED));
+        tris.add(new Triangle(new Vertex(-100, 100, -100),
+                new Vertex(100, -100, -100),
                 new Vertex(-100, -100, 100),
-                Color.BLUE));
+                Color.WHITE));
         return tris;
+    }
+
+    public static Color setColorWithLight(Color color, double shade){
+        double redLinear = Math.pow(color.getRed(), 2.4) * shade;
+        double greenLinear = Math.pow(color.getGreen(), 2.4) * shade;
+        double blueLinear = Math.pow(color.getBlue(), 2.4) * shade;
+
+        int red = (int) Math.pow(redLinear, 1/2.4);
+        int green = (int) Math.pow(greenLinear, 1/2.4);
+        int blue = (int) Math.pow(blueLinear, 1/2.4);
+
+        return new Color(red, green, blue);
     }
 }
